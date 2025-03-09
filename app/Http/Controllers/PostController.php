@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Post;
-use Carbon\Carbon;
 class PostController extends Controller
 {
     public function index()
@@ -38,8 +36,7 @@ class PostController extends Controller
     }
     public function destroy($id)
     {
-        $post = Post::find($id);
-        $post->delete();
+        Post::destroy($id);
         return to_route('posts.index');
     }
     public function edit($id)
