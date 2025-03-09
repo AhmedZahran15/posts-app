@@ -1,8 +1,9 @@
 <x-layout>
     <!-- Table Component -->
-    <div class="mt-6 rounded-lg border border-gray-200">
-        <div class="overflow-x-auto rounded-t-lg">
-            <table class="min-w-full text-center divide-y-2 divide-gray-200 bg-white text-sm">
+    <div class="px-4">
+        <div class="overflow-x-auto">
+            <table
+                class="min-w-full border-2 rounded-lg border-neutral-200 text-center divide-y-2 divide-gray-200 bg-white text-sm">
                 <thead>
                     <tr>
                         <th class="px-4 py-2 font-medium whitespace-nowrap text-gray-900">#</th>
