@@ -1,14 +1,4 @@
 <x-layout>
-    <div class="text-center flex gap-4 justify-center items-center">
-        <a href="{{ route('posts.create') }}"
-            class="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            Create Post
-        </a>
-        {{-- <x-button href="{{ route('posts.create') }}" :type="'danger'">
-            TEST BUTTON
-        </x-button> --}}
-    </div>
-
     <!-- Table Component -->
     <div class="mt-6 rounded-lg border border-gray-200">
         <div class="overflow-x-auto rounded-t-lg">
