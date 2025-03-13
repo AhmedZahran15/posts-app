@@ -13,6 +13,12 @@ class CommentController extends Controller
 
     public function store(Request $request, Post $post)
     {
+        // Validate the request
+        $request->validate([
+            'content' => 'required|string|min:3'
+        ]);
+
+        // Create the comment
         $comment = new Comment([
             'content' => $request->content,
             'post_id' => $post->id,

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Post;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class PostSeeder extends Seeder
 {
@@ -13,6 +13,25 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        Post::factory()->count(500)->create();
+        // Get all user IDs
+        $userIds = User::pluck('id')->toArray();
+
+        // Create 30 posts
+        for ($i = 0; $i < 30; $i++) {
+            Post::create([
+                'title' => fake()->sentence(rand(4, 8)),
+                'description' => fake()->paragraphs(rand(3, 7), true),
+                'user_id' => fake()->randomElement($userIds),
+            ]);
+        }
+
+        // Optionally, create some trashed posts
+        for ($i = 0; $i < 5; $i++) {
+            Post::create([
+                'title' => fake()->sentence(rand(4, 8)),
+                'description' => fake()->paragraphs(rand(3, 7), true),
+                'user_id' => fake()->randomElement($userIds),
+            ])->delete();
+        }
     }
 }
