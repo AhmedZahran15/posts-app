@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -25,18 +27,19 @@ class PostController extends Controller
 
     public function create()
     {
-        $users = User::all();
-        return view('posts.create', ['users' => $users]);
+        // No need to pass users anymore since we don't show the selector
+        return view('posts.create');
     }
+
     public function store()
     {
         $title = request('title');
         $description = request('description');
-        $user_id = request('post_creator');
+
         $post = Post::create([
             'title' => $title,
             'description' => $description,
-            'user_id' => $user_id,
+            'user_id' => Auth::id(), // Use the currently authenticated user's ID
         ]);
         return to_route('posts.show', ['post' => $post->id]);
     }
@@ -48,22 +51,41 @@ class PostController extends Controller
     }
     public function destroy($id)
     {
+        $post = Post::find($id);
+
+        // Check if user is authorized to delete this post
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to delete this post.');
+        }
+
         Post::destroy($id);
         return to_route('posts.index');
     }
     public function edit($id)
     {
         $post = Post::find($id);
-        $users = User::all();
-        return view('posts.edit', ['post' => $post, 'users' => $users]);
+
+        // Check if user is authorized to edit this post
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to edit this post.');
+        }
+
+        // No need to pass users anymore since we don't show the selector
+        return view('posts.edit', ['post' => $post]);
     }
     public function update($id)
     {
         $post = Post::find($id);
+
+        // Check if user is authorized to update this post
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to update this post.');
+        }
+
         $post->update([
             'title' => request('title'),
             'description' => request('description'),
-            'user_id' => request('post_creator')
+            // Don't change the user_id - keep the original author
         ]);
         return to_route('posts.index');
     }
@@ -101,6 +123,12 @@ class PostController extends Controller
     public function forceDelete($id)
     {
         $post = Post::withTrashed()->findOrFail($id);
+
+        // Check if user is authorized to force delete this post
+        if (Auth::id() !== $post->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to permanently delete this post.');
+        }
+
         $post->forceDelete();
         return redirect()->route('posts.trashed')->with('success', 'Post permanently deleted');
     }

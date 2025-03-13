@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -15,20 +16,29 @@ class CommentController extends Controller
         $comment = new Comment([
             'content' => $request->content,
             'post_id' => $post->id,
-            'user_id' => 1
+            'user_id' => Auth::id() // Use the currently authenticated user's ID
         ]);
         $comment->save();
         return redirect()->route('posts.show', $post)->with('success', 'Comment added successfully!');
     }
 
-
     public function edit(Post $post, Comment $comment)
     {
+        // Check if user is authorized to edit this comment
+        if (Auth::id() !== $comment->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to edit this comment.');
+        }
+
         return view('comments.edit', compact('post', 'comment'));
     }
 
     public function update(Request $request, Post $post, Comment $comment)
     {
+        // Check if user is authorized to update this comment
+        if (Auth::id() !== $comment->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to update this comment.');
+        }
+
         $comment->update([
             'content' => $request->content,
         ]);
@@ -37,8 +47,12 @@ class CommentController extends Controller
 
     public function destroy(Post $post, Comment $comment)
     {
-        $comment->delete();
+        // Check if user is authorized to delete this comment
+        if (Auth::id() !== $comment->user_id) {
+            return redirect()->back()->with('error', 'You are not authorized to delete this comment.');
+        }
 
+        $comment->delete();
         return redirect()->route('posts.show', $post)->with('success', 'Comment deleted successfully!');
     }
 }
