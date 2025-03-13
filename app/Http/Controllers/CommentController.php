@@ -58,7 +58,9 @@ class CommentController extends Controller
             return redirect()->back()->with('error', 'You are not authorized to delete this comment.');
         }
 
-        $comment->delete();
+        // Use forceDelete() instead of delete() to permanently remove the comment
+        $comment->forceDelete();
+
         return redirect()->route('posts.show', $post)->with('success', 'Comment deleted successfully!');
     }
 }
