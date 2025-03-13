@@ -28,15 +28,15 @@ $typeClasses = [
 $classes = $baseClasses . ' ' . $sizeClasses[$size] . ' ' . $typeClasses[$type];
 @endphp
 
-@if($href)
+@if($href && strtoupper($method) === 'GET')
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
         @if($icon)
             <span class="mr-2">{!! $icon !!}</span>
         @endif
         {{ $slot }}
     </a>
-@elseif($method !== 'GET')
-    <form action="{{ $href ?? '#' }}" method="POST" class="inline-block" {{ $form ? "id={$form}" : '' }}>
+@elseif($href)
+    <form action="{{ $href }}" method="POST" class="inline-block" {{ $form ? "id={$form}" : '' }}>
         @csrf
         @method($method)
         <button type="submit" {{ $attributes->merge(['class' => $classes]) }}
