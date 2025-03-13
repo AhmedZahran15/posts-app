@@ -123,12 +123,12 @@ class PostController extends Controller
     public function forceDelete($id)
     {
         $post = Post::withTrashed()->findOrFail($id);
-
         // Check if user is authorized to force delete this post
         if (Auth::id() !== $post->user_id) {
             return redirect()->back()->with('error', 'You are not authorized to permanently delete this post.');
         }
-
+        $post->comments()->forceDelete();
+        // Now force delete the post
         $post->forceDelete();
         return redirect()->route('posts.trashed')->with('success', 'Post permanently deleted');
     }
