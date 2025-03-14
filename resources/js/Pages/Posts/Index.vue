@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { ref, onMounted, computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useToast } from '@/Components/ui/toast/use-toast';
 import PostList from '@/Components/Posts/PostList.vue';
@@ -8,6 +8,20 @@ import PostCreateDialog from '@/Components/Posts/PostCreateDialog.vue';
 import PostEditDialog from '@/Components/Posts/PostEditDialog.vue';
 import PostDeleteDialog from '@/Components/Posts/PostDeleteDialog.vue';
 import PostViewDialog from '@/Components/Posts/PostViewDialog.vue';
+
+// Import pagination components
+import {
+    Pagination,
+    PaginationList,
+    PaginationListItem,
+} from '@/Components/ui/pagination';
+import {
+    PaginationEllipsis,
+    PaginationFirst,
+    PaginationLast,
+    PaginationNext,
+    PaginationPrev,
+} from '@/Components/ui/pagination';
 
 const props = defineProps({
     posts: Object,
@@ -100,6 +114,53 @@ const handlePostDeleted = () => {
         description: 'Post moved to trash',
     });
 };
+
+// Create computed properties for pagination
+const currentPage = computed(() => props.posts.current_page);
+const lastPage = computed(() => props.posts.last_page);
+
+// Generate pagination links array for rendering
+const paginationLinks = computed(() => {
+    const links = [];
+
+    if (lastPage.value <= 7) {
+        // Show all pages if total pages are 7 or fewer
+        for (let i = 1; i <= lastPage.value; i++) {
+            links.push(i);
+        }
+    } else {
+        // Always include first page
+        links.push(1);
+
+        // Calculate which page numbers to show
+        if (currentPage.value <= 3) {
+            // Near the start
+            links.push(2, 3, 4, 5, '...', lastPage.value);
+        } else if (currentPage.value >= lastPage.value - 2) {
+            // Near the end
+            links.push(
+                '...',
+                lastPage.value - 4,
+                lastPage.value - 3,
+                lastPage.value - 2,
+                lastPage.value - 1,
+                lastPage.value,
+            );
+        } else {
+            // Somewhere in the middle
+            links.push(
+                '...',
+                currentPage.value - 1,
+                currentPage.value,
+                currentPage.value + 1,
+                '...',
+                lastPage.value,
+            );
+        }
+    }
+
+    return links;
+});
 </script>
 
 <template>
@@ -134,6 +195,123 @@ const handlePostDeleted = () => {
                             @edit="openEditDialog"
                             @delete="openDeleteDialog"
                         />
+
+                        <!-- Pagination with improved horizontal layout -->
+                        <div class="mt-8 border-t border-gray-200 pt-4">
+                            <!-- Add page counter above pagination -->
+                            <div class="mb-2 text-center text-sm text-gray-600">
+                                Page {{ currentPage }} of {{ lastPage }}
+                            </div>
+                            <div class="flex justify-center">
+                                <Pagination
+                                    class="flex flex-row items-center space-x-2"
+                                >
+                                    <!-- Fix First Page button -->
+                                    <Link
+                                        :href="`/posts?page=1`"
+                                        :class="[
+                                            'inline-flex h-9 w-9 items-center justify-center rounded-md',
+                                            currentPage === 1
+                                                ? 'cursor-not-allowed opacity-50'
+                                                : 'hover:bg-muted',
+                                        ]"
+                                        :disabled="currentPage === 1"
+                                        preserve-scroll
+                                    >
+                                        <PaginationFirst />
+                                    </Link>
+
+                                    <!-- Fix Previous Page button -->
+                                    <Link
+                                        :href="
+                                            currentPage > 1
+                                                ? `/posts?page=${currentPage - 1}`
+                                                : '#'
+                                        "
+                                        :class="[
+                                            'inline-flex h-9 w-9 items-center justify-center rounded-md',
+                                            currentPage === 1
+                                                ? 'cursor-not-allowed opacity-50'
+                                                : 'hover:bg-muted',
+                                        ]"
+                                        :disabled="currentPage === 1"
+                                        preserve-scroll
+                                    >
+                                        <PaginationPrev />
+                                    </Link>
+
+                                    <PaginationList class="flex items-center">
+                                        <template
+                                            v-for="(
+                                                page, index
+                                            ) in paginationLinks"
+                                            :key="index"
+                                        >
+                                            <PaginationListItem
+                                                v-if="page === '...'"
+                                                class="mx-1"
+                                            >
+                                                <PaginationEllipsis
+                                                    class="h-9 w-9"
+                                                />
+                                            </PaginationListItem>
+                                            <PaginationListItem
+                                                v-else
+                                                :value="page"
+                                                class="mx-1"
+                                            >
+                                                <Link
+                                                    :href="`/posts?page=${page}`"
+                                                    :class="[
+                                                        'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm transition-colors',
+                                                        page === currentPage
+                                                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                                            : 'hover:bg-muted',
+                                                    ]"
+                                                    preserve-scroll
+                                                >
+                                                    {{ page }}
+                                                </Link>
+                                            </PaginationListItem>
+                                        </template>
+                                    </PaginationList>
+
+                                    <!-- Fix Next Page button -->
+                                    <Link
+                                        :href="
+                                            currentPage < lastPage
+                                                ? `/posts?page=${currentPage + 1}`
+                                                : '#'
+                                        "
+                                        :class="[
+                                            'inline-flex h-9 w-9 items-center justify-center rounded-md',
+                                            currentPage === lastPage
+                                                ? 'cursor-not-allowed opacity-50'
+                                                : 'hover:bg-muted',
+                                        ]"
+                                        :disabled="currentPage === lastPage"
+                                        preserve-scroll
+                                    >
+                                        <PaginationNext />
+                                    </Link>
+
+                                    <!-- Fix Last Page button -->
+                                    <Link
+                                        :href="`/posts?page=${lastPage}`"
+                                        :class="[
+                                            'inline-flex h-9 w-9 items-center justify-center rounded-md',
+                                            currentPage === lastPage
+                                                ? 'cursor-not-allowed opacity-50'
+                                                : 'hover:bg-muted',
+                                        ]"
+                                        :disabled="currentPage === lastPage"
+                                        preserve-scroll
+                                    >
+                                        <PaginationLast />
+                                    </Link>
+                                </Pagination>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
