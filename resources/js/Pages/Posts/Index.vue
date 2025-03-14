@@ -23,6 +23,8 @@ const showViewDialog = ref(false);
 const selectedPost = ref(null);
 const filterKeyword = ref('');
 
+const selectedPostId = ref(null);
+
 onMounted(() => {
     if (props.flash?.message) {
         toast({
@@ -47,7 +49,7 @@ const openDeleteDialog = (post) => {
 };
 
 const openViewDialog = (post) => {
-    selectedPost.value = post;
+    selectedPostId.value = post.id;
     showViewDialog.value = true;
 };
 
@@ -133,7 +135,7 @@ const handlePostDeleted = () => {
 
         <PostViewDialog
             :show="showViewDialog"
-            :post="selectedPost"
+            :postId="selectedPostId"
             @update:show="showViewDialog = $event"
         />
     </AppLayout>

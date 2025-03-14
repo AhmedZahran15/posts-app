@@ -56,8 +56,10 @@ class PostController extends Controller
 
         if (request()->wantsJson()) {
             return response()->json([
-                'post' => $post
-            ]);
+                'post' => $post,
+                'comments' => $post->comments,
+                'message' => 'Post retrieved successfully'
+            ])->setStatusCode(200, 'Post retrieved successfully');
         }
 
         return Inertia::render('Posts/Show', [

@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue';
 import {
     Table,
     TableBody,
@@ -10,12 +9,11 @@ import {
     TableRow,
 } from '@/Components/ui/table';
 import { Button } from '@/Components/ui/button';
-import {Pagination} from '@/Components/ui/pagination';
+import { Pagination } from '@/Components/ui/pagination';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     posts: Object,
-    filter: String,
 });
 
 const emit = defineEmits(['edit', 'delete', 'view']);
@@ -29,16 +27,6 @@ const formattedDate = (date) => {
         minute: '2-digit',
     });
 };
-
-const filteredPosts = computed(() => {
-    if (!props.filter) return props.posts.data;
-
-    return props.posts.data.filter(
-        (post) =>
-            post.title.toLowerCase().includes(props.filter.toLowerCase()) ||
-            post.content.toLowerCase().includes(props.filter.toLowerCase()),
-    );
-});
 
 const goToPage = (url) => {
     router.visit(url);
@@ -60,7 +48,7 @@ const goToPage = (url) => {
             </TableHeader>
             <TableBody>
                 <TableRow
-                    v-for="post in filteredPosts"
+                    v-for="post in posts.data"
                     :key="post.id"
                     class="hover:bg-gray-50"
                 >
@@ -94,7 +82,7 @@ const goToPage = (url) => {
                         </div>
                     </TableCell>
                 </TableRow>
-                <TableRow v-if="filteredPosts.length === 0">
+                <TableRow v-if="posts.data.length === 0">
                     <TableCell colspan="5" class="py-4 text-center"
                         >No posts found</TableCell
                     >

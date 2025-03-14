@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use \App\Http\Controllers\PostController;
 use \App\Http\Controllers\CommentController;
+use App\Models\Post;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -45,5 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}/comments/{comment}', [CommentController::class, 'update'])->name('posts.comments.update');
     Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy'])->name('posts.comments.destroy');
 });
+
+// Add an explicit route for post API data
+Route::get('/api/posts/{post}', function (Post $post) {
+    return $post->load(['user', 'comments.user']);
+})->name('posts.api.show');
 
 require __DIR__ . '/auth.php';
