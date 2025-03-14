@@ -54,4 +54,7 @@ Route::middleware('auth')->group(function () {
     ]);
 });
 
+Route::get('/postdata/{id}', [PostController::class, 'getPostData']);
+
+
 require __DIR__ . '/auth.php';
