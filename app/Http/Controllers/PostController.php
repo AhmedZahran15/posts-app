@@ -36,7 +36,7 @@ class PostController extends Controller
         $post = Post::create([
             'title' => $validated['title'],
             'content' => $validated['content'],
-            'user_id' => auth()->id(),
+            'user_id' => auth()->id()
         ]);
 
         if ($request->wantsJson()) {
