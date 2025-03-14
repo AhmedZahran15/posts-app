@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,7 +14,6 @@ import {
 import { Input } from '@/Components/ui/input';
 import { Textarea } from '@/Components/ui/textarea';
 import { Label } from '@/Components/ui/label';
-import PostFormFields from './PostFormFields.vue';
 
 const props = defineProps({
     show: {
@@ -25,31 +24,52 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show', 'created']);
 
-const form = useForm({
+// Use simple refs instead of useForm
+const formData = ref({
     title: '',
-    content: '',
+    discription: '',
 });
-
+const errors = ref({});
 const isSubmitting = ref(false);
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
     isSubmitting.value = true;
-    form.post(route('posts.store'), {
-        headers: { Accept: 'application/json' },
-        preserveScroll: true,
-        onSuccess: () => {
-            form.reset();
-            emit('created');
-            isSubmitting.value = false;
-        },
-        onError: () => {
-            isSubmitting.value = false;
-        },
-    });
+    errors.value = {};
+
+    try {
+        // Configure axios to work with Laravel's CSRF protection
+        // Use the pre-configured Laravel sanctum setup
+        axios.defaults.withCredentials = true;
+
+        // Send request with axios
+        const response = await axios.post(route('posts.store'), {
+            title: formData.value.title,
+            description: formData.value.discription,
+        });
+
+        // Handle success
+        resetForm();
+        emit('created', response.data.post);
+    } catch (error) {
+        // Handle validation errors
+        if (error.response && error.response.status === 422) {
+            errors.value = error.response.data.errors;
+        } else {
+            console.error('Error creating post:', error);
+        }
+    } finally {
+        isSubmitting.value = false;
+    }
+};
+
+const resetForm = () => {
+    formData.value.title = '';
+    formData.value.discription = '';
+    errors.value = {};
 };
 
 const handleCancel = () => {
-    form.reset();
+    resetForm();
     emit('update:show', false);
 };
 </script>
@@ -65,11 +85,38 @@ const handleCancel = () => {
             </AlertDialogHeader>
 
             <div class="py-4">
-                <PostFormFields
-                    v-model:title="form.title"
-                    v-model:content="form.content"
-                    :errors="form.errors"
-                />
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="title">Title</Label>
+                        <Input
+                            id="title"
+                            v-model="formData.title"
+                            placeholder="Enter post title"
+                        />
+                        <p
+                            v-if="errors.title"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ errors.title[0] }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="discription">Content</Label>
+                        <Textarea
+                            id="discription"
+                            v-model="formData.discription"
+                            placeholder="Enter post description"
+                            rows="5"
+                        />
+                        <p
+                            v-if="errors.description"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ errors.description[0] }}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <AlertDialogFooter>

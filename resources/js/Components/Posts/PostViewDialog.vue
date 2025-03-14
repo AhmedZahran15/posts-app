@@ -11,7 +11,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/Components/ui/alert-dialog';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     show: {

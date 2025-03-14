@@ -28,26 +28,28 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        // Validate the request
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required',
+            'description' => 'required',
         ]);
 
+        // Create the post
         $post = Post::create([
             'title' => $validated['title'],
-            'content' => $validated['content'],
+            'description' => $validated['description'],
             'user_id' => auth()->id()
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'post' => $post->load('user'),
-                'message' => 'Post created successfully'
-            ]);
-        }
+        // Load the user relationship for the response
+        $post->load('user');
 
-        return redirect()->route('posts.index')
-            ->with('message', 'Post created successfully');
+        // Return JSON response for axios requests
+        return response()->json([
+            'success' => true,
+            'post' => $post,
+            'message' => 'Post created successfully'
+        ], 201); // 201 Created status code
     }
 
     public function show(Post $post)
@@ -77,22 +79,21 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
+        // Validate the request
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required',
+            'description' => 'required',
         ]);
 
+        // Update the post
         $post->update($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'post' => $post->fresh()->load('user'),
-                'message' => 'Post updated successfully'
-            ]);
-        }
-
-        return redirect()->route('posts.show', $post)
-            ->with('message', 'Post updated successfully');
+        // Return appropriate response
+        return response()->json([
+            'success' => true,
+            'post' => $post->fresh()->load('user'),
+            'message' => 'Post updated successfully'
+        ]);
     }
 
     public function destroy(Post $post)

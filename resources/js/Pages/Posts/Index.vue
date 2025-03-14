@@ -4,7 +4,6 @@ import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useToast } from '@/Components/ui/toast/use-toast';
 import PostList from '@/Components/Posts/PostList.vue';
-import PostFilter from '@/Components/Posts/PostFilter.vue';
 import PostCreateDialog from '@/Components/Posts/PostCreateDialog.vue';
 import PostEditDialog from '@/Components/Posts/PostEditDialog.vue';
 import PostDeleteDialog from '@/Components/Posts/PostDeleteDialog.vue';
@@ -21,7 +20,6 @@ const showEditDialog = ref(false);
 const showDeleteDialog = ref(false);
 const showViewDialog = ref(false);
 const selectedPost = ref(null);
-const filterKeyword = ref('');
 
 const selectedPostId = ref(null);
 
@@ -53,16 +51,42 @@ const openViewDialog = (post) => {
     showViewDialog.value = true;
 };
 
-const handlePostCreated = () => {
+const handlePostCreated = (newPost) => {
     showCreateDialog.value = false;
+
+    // Add the new post to the posts list if it's returned from the API
+    if (newPost && props.posts.data) {
+        // Add to the beginning of the list
+        props.posts.data.unshift(newPost);
+
+        // Remove the last item if we're at the pagination limit
+        if (
+            props.posts.per_page &&
+            props.posts.data.length > props.posts.per_page
+        ) {
+            props.posts.data.pop();
+        }
+    }
+
     toast({
         title: 'Success',
         description: 'Post created successfully',
     });
 };
 
-const handlePostUpdated = () => {
+const handlePostUpdated = (updatedPost) => {
     showEditDialog.value = false;
+
+    // Update the post in the list if it's returned from the API
+    if (updatedPost && props.posts.data) {
+        const index = props.posts.data.findIndex(
+            (post) => post.id === updatedPost.id,
+        );
+        if (index !== -1) {
+            props.posts.data[index] = updatedPost;
+        }
+    }
+
     toast({
         title: 'Success',
         description: 'Post updated successfully',
@@ -79,8 +103,14 @@ const handlePostDeleted = () => {
 </script>
 
 <template>
-    <AppLayout title="Posts">
-        <Head title="Posts" />
+    <Head title="Posts" />
+
+    <AppLayout>
+        <template #header>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                Posts
+            </h2>
+        </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -98,11 +128,8 @@ const handlePostDeleted = () => {
                             </button>
                         </div>
 
-                        <PostFilter v-model="filterKeyword" />
-
                         <PostList
                             :posts="posts"
-                            :filter="filterKeyword"
                             @view="openViewDialog"
                             @edit="openEditDialog"
                             @delete="openDeleteDialog"

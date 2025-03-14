@@ -8,7 +8,7 @@ const props = defineProps({
         type: String,
         required: true,
     },
-    content: {
+    discription: {
         type: String,
         required: true,
     },
@@ -18,7 +18,8 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['update:title', 'update:content']);
+// Fix emits to match the actual events being used
+const emit = defineEmits(['update:title', 'update:discription']);
 </script>
 
 <template>
@@ -37,16 +38,19 @@ const emit = defineEmits(['update:title', 'update:content']);
         </div>
 
         <div class="space-y-2">
-            <Label for="content">Content</Label>
+            <Label for="discription">Content</Label>
             <Textarea
-                id="content"
-                :value="content"
-                @input="emit('update:content', $event.target.value)"
-                placeholder="Enter post content"
+                id="discription"
+                :value="discription"
+                @input="emit('update:discription', $event.target.value)"
+                placeholder="Enter post description"
                 rows="5"
             />
-            <p v-if="errors.content" class="mt-1 text-sm text-red-500">
-                {{ errors.content }}
+            <p
+                v-if="errors.discription || errors.description"
+                class="mt-1 text-sm text-red-500"
+            >
+                {{ errors.discription || errors.description }}
             </p>
         </div>
     </div>
