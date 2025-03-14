@@ -63,7 +63,6 @@ const fetchPostData = async () => {
         const url = `/api/posts/${props.postId}`;
         const response = await axios.get(url);
         post.value = response.data;
-        console.log('Post data loaded:', post.value);
     } catch (err) {
         console.error('Error fetching post:', err);
         error.value = 'Failed to load post data. Please try again.';
