@@ -27,7 +27,6 @@ class PostController extends Controller
 
     public function create()
     {
-        // No need to pass users anymore since we don't show the selector
         return view('posts.create');
     }
 
@@ -64,72 +63,60 @@ class PostController extends Controller
     public function edit($id)
     {
         $post = Post::find($id);
-
-        // Check if user is authorized to edit this post
         if (Auth::id() !== $post->user_id) {
             return redirect()->back()->with('error', 'You are not authorized to edit this post.');
         }
-
-        // No need to pass users anymore since we don't show the selector
         return view('posts.edit', ['post' => $post]);
     }
     public function update($id)
     {
         $post = Post::find($id);
-
-        // Check if user is authorized to update this post
         if (Auth::id() !== $post->user_id) {
             return redirect()->back()->with('error', 'You are not authorized to update this post.');
         }
-
         $post->update([
             'title' => request('title'),
             'description' => request('description'),
-            // Don't change the user_id - keep the original author
         ]);
         return to_route('posts.index');
     }
 
-    /**
-     * Display a listing of trashed posts.
-     */
     public function trashed()
     {
-        // Redirect to the index with a view parameter
         return redirect()->route('posts.index', ['view' => 'trashed']);
     }
 
-    /**
-     * Restore a soft-deleted post.
-     */
     public function restore($id)
     {
         $post = Post::withTrashed()->findOrFail($id);
-
-        // Get count of trashed comments before restoration
         $trashedCommentsCount = $post->comments()->onlyTrashed()->count();
-
-        // Restore the post (the observer will handle restoring comments)
         $post->restore();
-
         $message = 'Post restored successfully with ' . $trashedCommentsCount . ' comment(s) also restored.';
-
         return redirect()->route('posts.index')->with('success', $message);
     }
 
-    /**
-     * Permanently delete a soft-deleted post.
-     */
     public function forceDelete($id)
     {
         $post = Post::withTrashed()->findOrFail($id);
-        // Check if user is authorized to force delete this post
         if (Auth::id() !== $post->user_id) {
             return redirect()->back()->with('error', 'You are not authorized to permanently delete this post.');
         }
         $post->comments()->forceDelete();
-        // Now force delete the post
         $post->forceDelete();
         return redirect()->route('posts.trashed')->with('success', 'Post permanently deleted');
     }
+
+    public function getPostData($id)
+    {
+        $post = Post::with('user')->findOrFail($id);
+        return response()->json([
+            'id' => $post->id,
+            'title' => $post->title,
+            'description' => $post->description,
+            'user_name' => $post->user->name,
+            'user_email' => $post->user->email,
+            'created_at' => $post->created_at->format('M d, Y')
+        ], 200);
+    }
+
 }
