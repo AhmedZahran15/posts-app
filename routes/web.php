@@ -27,34 +27,23 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // Index route
+    // Posts resource routes
     Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
-
-    // Specific routes with fixed segments
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-
-    // Add this route BEFORE the parametrized routes
     Route::get('/posts/trashed', [PostController::class, 'trashed'])->name('posts.trashed');
     Route::patch('/posts/{id}/restore', [PostController::class, 'restore'])->name('posts.restore');
     Route::delete('/posts/{id}/force-delete', [PostController::class, 'forceDelete'])->name('posts.forceDelete');
-
-    // Parametrized routes with variables
     Route::delete('/posts/{post}/delete', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
-    // Nested routes for comments
-    Route::resource('posts.comments', CommentController::class)->only([
-        'store',
-        'edit',
-        'update',
-        'destroy'
-    ]);
+    // Comments routes
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('posts.comments.store');
+    Route::get('/posts/{post}/comments/{comment}/edit', [CommentController::class, 'edit'])->name('posts.comments.edit');
+    Route::put('/posts/{post}/comments/{comment}', [CommentController::class, 'update'])->name('posts.comments.update');
+    Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy'])->name('posts.comments.destroy');
 });
-
-Route::get('/postdata/{id}', [PostController::class, 'getPostData']);
-
 
 require __DIR__ . '/auth.php';
