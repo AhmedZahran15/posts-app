@@ -20,11 +20,11 @@ class PostController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        // This method won't be needed for SPA approach
-        return Inertia::render('Posts/Create');
-    }
+    // public function create()
+    // {
+    //     // This method won't be needed for SPA approach
+    //     return Inertia::render('Posts/Create');
+    // }
 
     public function store(Request $request)
     {
@@ -52,30 +52,30 @@ class PostController extends Controller
         ], 201); // 201 Created status code
     }
 
-    public function show(Post $post)
-    {
-        $post->load('user', 'comments.user');
+    // public function show(Post $post)
+    // {
+    //     $post->load('user', 'comments.user');
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'post' => $post,
-                'comments' => $post->comments,
-                'message' => 'Post retrieved successfully'
-            ])->setStatusCode(200, 'Post retrieved successfully');
-        }
+    //     if (request()->wantsJson()) {
+    //         return response()->json([
+    //             'post' => $post,
+    //             'comments' => $post->comments,
+    //             'message' => 'Post retrieved successfully'
+    //         ])->setStatusCode(200, 'Post retrieved successfully');
+    //     }
 
-        return Inertia::render('Posts/Show', [
-            'post' => $post
-        ]);
-    }
+    //     return Inertia::render('Posts/Show', [
+    //         'post' => $post
+    //     ]);
+    // }
 
-    public function edit(Post $post)
-    {
-        // This method won't be needed for SPA approach
-        return Inertia::render('Posts/Edit', [
-            'post' => $post
-        ]);
-    }
+    // public function edit(Post $post)
+    // {
+    //     // This method won't be needed for SPA approach
+    //     return Inertia::render('Posts/Edit', [
+    //         'post' => $post
+    //     ]);
+    // }
 
     public function update(Request $request, Post $post)
     {
@@ -110,14 +110,14 @@ class PostController extends Controller
             ->with('message', 'Post moved to trash');
     }
 
-    public function trashed()
-    {
-        $trashedPosts = Post::onlyTrashed()->with('user')->paginate(10);
+    // public function trashed()
+    // {
+    //     $trashedPosts = Post::onlyTrashed()->with('user')->paginate(10);
 
-        return Inertia::render('Posts/Trashed', [
-            'posts' => $trashedPosts
-        ]);
-    }
+    //     return Inertia::render('Posts/Trashed', [
+    //         'posts' => $trashedPosts
+    //     ]);
+    // }
 
     public function restore($id)
     {
