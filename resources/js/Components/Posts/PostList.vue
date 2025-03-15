@@ -8,10 +8,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/Components/ui/table';
-import { Button } from '@/Components/ui/button';
 import { Pagination } from '@/Components/ui/pagination';
 import { router } from '@inertiajs/vue3';
-
+import { Button } from '@/Components/ui/button';
 const props = defineProps({
     posts: Object,
 });
@@ -59,7 +58,7 @@ const goToPage = (url) => {
                     <TableCell>
                         <div class="flex space-x-2">
                             <Button
-                                variant="outline"
+                                variant="default"
                                 size="sm"
                                 @click="emit('view', post)"
                             >
