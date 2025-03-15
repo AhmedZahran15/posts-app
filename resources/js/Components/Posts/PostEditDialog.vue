@@ -31,7 +31,11 @@ const emit = defineEmits(['update:show', 'updated']);
 const formData = ref({
     title: '',
     description: '',
+    image: null,
 });
+
+const currentImageUrl = ref(null);
+const imagePreview = ref(null);
 const errors = ref({});
 const isSubmitting = ref(false);
 
@@ -41,10 +45,20 @@ watch(
         if (newPost) {
             formData.value.title = newPost.title;
             formData.value.description = newPost.description;
+            currentImageUrl.value = newPost.image_url;
+            imagePreview.value = null;
         }
     },
     { immediate: true },
 );
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        formData.value.image = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
 
 const handleSubmit = async () => {
     if (!props.post) return;
@@ -53,13 +67,25 @@ const handleSubmit = async () => {
     errors.value = {};
 
     try {
-        const response = await axios.put(
+        const form = new FormData();
+        form.append('title', formData.value.title);
+        form.append('description', formData.value.description);
+        form.append('_method', 'PUT'); // For method spoofing
+
+        if (formData.value.image) {
+            form.append('image', formData.value.image);
+        }
+
+        const response = await axios.post(
             route('posts.update', { post: props.post.id }),
+            form,
             {
-                title: formData.value.title,
-                description: formData.value.description,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             },
         );
+
         emit('updated', response.data.post);
         emit('update:show', false);
     } catch (error) {
@@ -75,6 +101,8 @@ const handleSubmit = async () => {
 
 const handleCancel = () => {
     errors.value = {};
+    formData.value.image = null;
+    imagePreview.value = null;
     emit('update:show', false);
 };
 </script>
@@ -122,6 +150,51 @@ const handleCancel = () => {
                         >
                             {{ errors.description[0] }}
                         </p>
+                    </div>
+
+                    <!-- Image Upload Field -->
+                    <div class="space-y-2">
+                        <Label for="edit-image"
+                            >Image (JPG, JPEG, PNG only)</Label
+                        >
+                        <Input
+                            type="file"
+                            id="edit-image"
+                            @change="handleImageChange"
+                            accept="image/jpeg,image/jpg,image/png"
+                            :class="{ 'border-red-500': errors.image }"
+                        />
+                        <p
+                            v-if="errors.image"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ errors.image[0] }}
+                        </p>
+
+                        <!-- Current Image Preview -->
+                        <div
+                            v-if="currentImageUrl && !imagePreview"
+                            class="mt-2"
+                        >
+                            <p class="mb-1 text-sm text-gray-500">
+                                Current image:
+                            </p>
+                            <img
+                                :src="currentImageUrl"
+                                alt="Current image"
+                                class="h-40 w-auto rounded border border-gray-200 object-contain"
+                            />
+                        </div>
+
+                        <!-- New Image Preview -->
+                        <div v-if="imagePreview" class="mt-2">
+                            <p class="mb-1 text-sm text-gray-500">New image:</p>
+                            <img
+                                :src="imagePreview"
+                                alt="Preview"
+                                class="h-40 w-auto rounded border border-gray-200 object-contain"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
