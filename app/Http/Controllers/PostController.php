@@ -52,22 +52,18 @@ class PostController extends Controller
         ], 201); // 201 Created status code
     }
 
-    // public function show(Post $post)
-    // {
-    //     $post->load('user', 'comments.user');
-
-    //     if (request()->wantsJson()) {
-    //         return response()->json([
-    //             'post' => $post,
-    //             'comments' => $post->comments,
-    //             'message' => 'Post retrieved successfully'
-    //         ])->setStatusCode(200, 'Post retrieved successfully');
-    //     }
-
-    //     return Inertia::render('Posts/Show', [
-    //         'post' => $post
-    //     ]);
-    // }
+    public function show(Post $post)
+    {
+        $post->load('user', 'comments.user');
+        if (request()->wantsJson()) {
+            return response()->json([
+                'post' => $post,
+                'comments' => $post->comments,
+                'user' => $post->user,
+                'message' => 'Post retrieved successfully'
+            ])->setStatusCode(200, 'Post retrieved successfully');
+        }
+    }
 
     // public function edit(Post $post)
     // {
