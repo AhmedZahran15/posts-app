@@ -16,7 +16,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'delete', 'view']);
-
 const formattedDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -40,6 +39,7 @@ const goToPage = (url) => {
                 <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Title</TableHead>
+                    <TableHead>Slug</TableHead>
                     <TableHead>Author</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead>Actions</TableHead>
@@ -53,6 +53,7 @@ const goToPage = (url) => {
                 >
                     <TableCell>{{ post.id }}</TableCell>
                     <TableCell class="font-medium">{{ post.title }}</TableCell>
+                    <TableCell>{{ post.slug }}</TableCell>
                     <TableCell>{{ post.user?.name }}</TableCell>
                     <TableCell>{{ formattedDate(post.created_at) }}</TableCell>
                     <TableCell>
