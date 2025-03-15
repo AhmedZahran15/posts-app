@@ -74,7 +74,7 @@ const handleConfirmDelete = () => {
                 <AlertDialogAction
                     :disabled="isDeleting"
                     @click="handleConfirmDelete"
-                    class="bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                    class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                     {{ isDeleting ? 'Deleting...' : 'Delete' }}
                 </AlertDialogAction>
