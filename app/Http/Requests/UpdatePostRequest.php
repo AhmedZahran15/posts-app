@@ -30,6 +30,7 @@ class UpdatePostRequest extends FormRequest
             ],
             'description' => 'required|min:10',
             'user_id' => 'sometimes|exists:users,id',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB, only jpg and png
         ];
     }
 }
