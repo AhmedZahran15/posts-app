@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,13 +28,10 @@ class PostController extends Controller
     //     return Inertia::render('Posts/Create');
     // }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        // Validate the request
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required',
-        ]);
+        // Request is already validated by StorePostRequest
+        $validated = $request->validated();
 
         // Create the post
         $post = Post::create([
@@ -73,13 +72,10 @@ class PostController extends Controller
     //     ]);
     // }
 
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
-        // Validate the request
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required',
-        ]);
+        // Request is already validated by UpdatePostRequest
+        $validated = $request->validated();
 
         // Update the post
         $post->update($validated);
