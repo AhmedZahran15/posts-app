@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\MaxPostsPerUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePostRequest extends FormRequest
@@ -24,7 +25,24 @@ class StorePostRequest extends FormRequest
         return [
             'title' => 'required|min:3|unique:posts,title',
             'description' => 'required|min:10',
-            'user_id' => 'sometimes|exists:users,id', // Add this validation to prevent invalid user_ids
+            'user_id' => 'sometimes|exists:users,id',
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $rule = new MaxPostsPerUser();
+
+            $rule->validate('post_limit', null, function ($message) use ($validator) {
+                $validator->errors()->add('cannot_create_post', $message);
+            });
+        });
     }
 }
