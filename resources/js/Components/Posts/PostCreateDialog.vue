@@ -172,7 +172,7 @@ const handleCancel = () => {
                             type="file"
                             id="image"
                             @change="handleImageChange"
-                            accept="image/jpeg,image/jpg,image/png"
+                            accept=".jpg,.jpeg,.png"
                             :class="{ 'border-red-500': errors.image }"
                         />
                         <p
