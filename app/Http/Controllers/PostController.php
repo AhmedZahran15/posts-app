@@ -25,12 +25,16 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
+
         $post = Post::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
+            'image' => $request->hasFile('image') ? $request->file('image') : null,
         ]);
+
         $post->load('user');
+
         return response()->json([
             'success' => true,
             'post' => $post,
@@ -54,10 +58,18 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         $validated = $request->validated();
+
         if (isset($validated['user_id'])) {
             unset($validated['user_id']);
         }
+
+        // Handle image upload if present
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image');
+        }
+
         $post->update($validated);
+
         return response()->json([
             'success' => true,
             'post' => $post->fresh()->load('user'),
@@ -67,6 +79,9 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        // Delete the associated image before soft deleting the post
+        $post->deleteImage();
+
         $post->delete();
 
         if (request()->wantsJson()) {
@@ -79,43 +94,31 @@ class PostController extends Controller
             ->with('message', 'Post moved to trash');
     }
 
-    // public function trashed()
-    // {
-    //     $trashedPosts = Post::onlyTrashed()->with('user')->paginate(10);
+    public function forceDelete(Post $post)
+    {
+        // Make sure to delete the image permanently
+        $post->deleteImage();
 
-    //     return Inertia::render('Posts/Trashed', [
-    //         'posts' => $trashedPosts
-    //     ]);
-    // }
+        $post->forceDelete();
 
-    // public function restore($id)
-    // {
-    //     $post = Post::onlyTrashed()->findOrFail($id);
-    //     $post->restore();
+        return redirect()->back()
+            ->with('message', 'Post permanently deleted.');
+    }
 
-    //     if (request()->wantsJson()) {
-    //         return response()->json([
-    //             'post' => $post->load('user'),
-    //             'message' => 'Post restored successfully'
-    //         ]);
-    //     }
+    public function restore($id)
+    {
+        Post::withTrashed()->findOrFail($id)->restore();
 
-    //     return redirect()->route('posts.trashed')
-    //         ->with('message', 'Post restored successfully');
-    // }
+        return redirect()->back()
+            ->with('message', 'Post restored successfully.');
+    }
 
-    // public function forceDelete($id)
-    // {
-    //     $post = Post::onlyTrashed()->findOrFail($id);
-    //     $post->forceDelete();
+    public function trashed()
+    {
+        $posts = Post::onlyTrashed()->with('user')->latest()->paginate(10);
 
-    //     if (request()->wantsJson()) {
-    //         return response()->json([
-    //             'message' => 'Post permanently deleted'
-    //         ]);
-    //     }
-
-    //     return redirect()->route('posts.trashed')
-    //         ->with('message', 'Post permanently deleted');
-    // }
+        return Inertia::render('Posts/Trashed', [
+            'posts' => $posts
+        ]);
+    }
 }
