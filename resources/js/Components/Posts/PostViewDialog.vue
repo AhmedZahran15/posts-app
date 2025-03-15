@@ -60,7 +60,7 @@ const fetchPostData = async () => {
 
     try {
         // Try both URL formats
-        const url = `/api/posts/${props.postId}`;
+        const url = `/posts/${props.postId}`;
         const response = await axios.get(url);
         post.value = response.data;
     } catch (err) {
@@ -91,10 +91,11 @@ const formatDate = (date) => {
                 <AlertDialogTitle class="text-xl">
                     <span v-if="loading">Loading...</span>
                     <span v-else-if="error">Error</span>
-                    <span v-else>{{ post?.title }}</span>
+                    <span v-else>{{ post?.post.title }}</span>
                 </AlertDialogTitle>
                 <AlertDialogDescription v-if="post?.user">
-                    By {{ post.user.name }} • {{ formatDate(post.created_at) }}
+                    By {{ post.user.name }} •
+                    {{ formatDate(post.post.created_at) }}
                 </AlertDialogDescription>
             </AlertDialogHeader>
 
@@ -126,7 +127,7 @@ const formatDate = (date) => {
                                 Description:
                             </h3>
                             <div class="mt-2 whitespace-pre-line text-gray-600">
-                                {{ post.description }}
+                                {{ post.post.description }}
                             </div>
                         </div>
                     </div>
