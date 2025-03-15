@@ -24,10 +24,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show', 'created']);
 
-// Use simple refs instead of useForm
+// Fix field name to match backend (description instead of discription)
 const formData = ref({
     title: '',
-    discription: '',
+    description: '', // Fixed typo
 });
 const errors = ref({});
 const isSubmitting = ref(false);
@@ -35,25 +35,18 @@ const isSubmitting = ref(false);
 const handleSubmit = async () => {
     isSubmitting.value = true;
     errors.value = {};
-
     try {
-        // Configure axios to work with Laravel's CSRF protection
-        // Use the pre-configured Laravel sanctum setup
         axios.defaults.withCredentials = true;
-
-        // Send request with axios
         const response = await axios.post(route('posts.store'), {
             title: formData.value.title,
-            description: formData.value.discription,
+            description: formData.value.description,
         });
-
-        // Handle success
         resetForm();
         emit('created', response.data.post);
+        emit('update:show', false);
     } catch (error) {
-        // Handle validation errors
         if (error.response && error.response.status === 422) {
-            errors.value = error.response.data.errors;
+            errors.value = error.response.data.errors || {};
         } else {
             console.error('Error creating post:', error);
         }
@@ -64,7 +57,7 @@ const handleSubmit = async () => {
 
 const resetForm = () => {
     formData.value.title = '';
-    formData.value.discription = '';
+    formData.value.description = ''; // Fixed field name
     errors.value = {};
 };
 
@@ -83,7 +76,6 @@ const handleCancel = () => {
                     Fill out the form below to create a new post.
                 </AlertDialogDescription>
             </AlertDialogHeader>
-
             <div class="py-4">
                 <div class="space-y-4">
                     <div class="space-y-2">
@@ -92,6 +84,7 @@ const handleCancel = () => {
                             id="title"
                             v-model="formData.title"
                             placeholder="Enter post title"
+                            :class="{ 'border-red-500': errors.title }"
                         />
                         <p
                             v-if="errors.title"
@@ -102,12 +95,13 @@ const handleCancel = () => {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="discription">Content</Label>
+                        <Label for="description">Content</Label>
                         <Textarea
-                            id="discription"
-                            v-model="formData.discription"
+                            id="description"
+                            v-model="formData.description"
                             placeholder="Enter post description"
                             rows="5"
+                            :class="{ 'border-red-500': errors.description }"
                         />
                         <p
                             v-if="errors.description"
@@ -126,12 +120,16 @@ const handleCancel = () => {
                 >
                     Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction
+
+                <!-- Replace AlertDialogAction with a regular button -->
+                <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                     :disabled="isSubmitting"
-                    @click="handleSubmit"
+                    @click.prevent="handleSubmit"
                 >
                     {{ isSubmitting ? 'Creating...' : 'Create Post' }}
-                </AlertDialogAction>
+                </button>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
