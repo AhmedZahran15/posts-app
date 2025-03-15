@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ImageValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +31,12 @@ class UpdatePostRequest extends FormRequest
             ],
             'description' => 'required|min:10',
             'user_id' => 'sometimes|exists:users,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB, only jpg and png
+            'image' => [
+                'nullable',
+                'file',
+                'max:2048', // 2MB max
+                new ImageValidationRule(),
+            ],
         ];
     }
 }

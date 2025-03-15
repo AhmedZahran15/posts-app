@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ImageValidationRule;
 use App\Rules\MaxPostsPerUser;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,7 +27,12 @@ class StorePostRequest extends FormRequest
             'title' => 'required|min:3|unique:posts,title',
             'description' => 'required|min:10',
             'user_id' => 'sometimes|exists:users,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB, only jpg and png
+            'image' => [
+                'nullable',
+                'file',
+                'max:2048', // 2MB max
+                new ImageValidationRule(),
+            ],
         ];
     }
 
