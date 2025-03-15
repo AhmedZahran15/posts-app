@@ -107,73 +107,62 @@ const formatDate = (date) => {
                     ></div>
                 </div>
 
-                <!-- Error state -->
-                <div v-else-if="error" class="py-4 text-center text-red-500">
-                    {{ error }}
-                    <button
-                        @click="fetchPostData"
-                        class="mt-2 text-sm text-blue-500 hover:underline"
-                    >
-                        Try again
-                    </button>
-                </div>
-
-                <!-- Content when loaded -->
-                <div v-else-if="post">
-                    <!-- Post description section -->
-                    <div class="prose max-w-none">
-                        <div class="mb-4">
-                            <h3 class="text-md font-medium text-gray-700">
-                                Description:
-                            </h3>
-                            <div class="mt-2 whitespace-pre-line text-gray-600">
-                                {{ post.post.description }}
-                            </div>
-                        </div>
+                <!-- Post content -->
+                <div v-else-if="post" class="space-y-4">
+                    <!-- Post image if available -->
+                    <div v-if="post.post.image_url" class="mb-4">
+                        <img
+                            :src="post.post.image_url"
+                            :alt="post.post.title"
+                            class="mx-auto max-h-80 rounded-lg object-contain"
+                        />
                     </div>
+
+                    <!-- Post description -->
+                    <p class="whitespace-pre-line text-gray-700">
+                        {{ post.post.description }}
+                    </p>
 
                     <!-- Comments section -->
                     <div
-                        class="mt-6"
-                        v-if="post.comments && post.comments.length > 0"
+                        v-if="post.comments && post.comments.length"
+                        class="mt-8"
                     >
-                        <h3 class="mb-4 text-lg font-medium text-gray-900">
-                            Comments
-                        </h3>
+                        <h4 class="mb-3 text-lg font-medium">Comments</h4>
                         <div class="space-y-4">
                             <div
                                 v-for="comment in post.comments"
                                 :key="comment.id"
-                                class="rounded-md bg-gray-50 p-4"
+                                class="rounded-md border border-gray-200 p-3"
                             >
-                                <div class="flex items-center justify-between">
-                                    <div class="font-medium">
-                                        {{ comment.user?.name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ formatDate(comment.created_at) }}
-                                    </div>
-                                </div>
-                                <div class="mt-2 text-gray-700">
+                                <p class="text-sm text-gray-700">
                                     {{ comment.content }}
+                                </p>
+                                <div
+                                    class="mt-2 flex items-center text-xs text-gray-500"
+                                >
+                                    <span>{{ comment.user.name }}</span>
+                                    <span class="mx-1">•</span>
+                                    <span>{{
+                                        formatDate(comment.created_at)
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <div
-                        v-else-if="post.comments && post.comments.length === 0"
+                        v-else-if="post.comments"
                         class="mt-6 text-center text-gray-500"
                     >
-                        No comments yet
+                        No comments yet.
                     </div>
                 </div>
             </div>
 
             <AlertDialogFooter>
-                <AlertDialogCancel @click="emit('update:show', false)">
+                <AlertDialogAction @click="emit('update:show', false)">
                     Close
-                </AlertDialogCancel>
+                </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
