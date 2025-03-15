@@ -24,23 +24,44 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show', 'created']);
 
-// Fix field name to match backend (description instead of discription)
 const formData = ref({
     title: '',
-    description: '', // Fixed typo
+    description: '',
+    image: null,
 });
+
+const imagePreview = ref(null);
 const errors = ref({});
 const isSubmitting = ref(false);
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        formData.value.image = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
 
 const handleSubmit = async () => {
     isSubmitting.value = true;
     errors.value = {};
+
     try {
+        const form = new FormData();
+        form.append('title', formData.value.title);
+        form.append('description', formData.value.description);
+
+        if (formData.value.image) {
+            form.append('image', formData.value.image);
+        }
+
         axios.defaults.withCredentials = true;
-        const response = await axios.post(route('posts.store'), {
-            title: formData.value.title,
-            description: formData.value.description,
+        const response = await axios.post(route('posts.store'), form, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
+
         resetForm();
         emit('created', response.data.post);
         emit('update:show', false);
@@ -57,7 +78,9 @@ const handleSubmit = async () => {
 
 const resetForm = () => {
     formData.value.title = '';
-    formData.value.description = ''; // Fixed field name
+    formData.value.description = '';
+    formData.value.image = null;
+    imagePreview.value = null;
     errors.value = {};
 };
 
@@ -140,6 +163,33 @@ const handleCancel = () => {
                         >
                             {{ errors.description[0] }}
                         </p>
+                    </div>
+
+                    <!-- Image Upload Field -->
+                    <div class="space-y-2">
+                        <Label for="image">Image (JPG, PNG only)</Label>
+                        <Input
+                            type="file"
+                            id="image"
+                            @change="handleImageChange"
+                            accept="image/jpeg,image/jpg,image/png"
+                            :class="{ 'border-red-500': errors.image }"
+                        />
+                        <p
+                            v-if="errors.image"
+                            class="mt-1 text-sm text-red-500"
+                        >
+                            {{ errors.image[0] }}
+                        </p>
+
+                        <!-- Image Preview -->
+                        <div v-if="imagePreview" class="mt-2">
+                            <img
+                                :src="imagePreview"
+                                alt="Preview"
+                                class="h-40 w-auto rounded border border-gray-200 object-contain"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
