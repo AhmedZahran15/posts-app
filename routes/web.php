@@ -46,10 +46,4 @@ Route::middleware('auth')->group(function () {
     Route::put('/posts/{post}/comments/{comment}', [CommentController::class, 'update'])->name('posts.comments.update');
     Route::delete('/posts/{post}/comments/{comment}', [CommentController::class, 'destroy'])->name('posts.comments.destroy');
 });
-
-// Add an explicit route for post API data
-Route::get('/api/posts/{post}', function (Post $post) {
-    return $post->load(['user', 'comments.user']);
-})->name('posts.api.show');
-
 require __DIR__ . '/auth.php';
