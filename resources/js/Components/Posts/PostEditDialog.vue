@@ -28,10 +28,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show', 'updated']);
 
-// Use simple refs instead of useForm
 const formData = ref({
     title: '',
-    discription: '',
+    description: '',
 });
 const errors = ref({});
 const isSubmitting = ref(false);
@@ -41,7 +40,7 @@ watch(
     (newPost) => {
         if (newPost) {
             formData.value.title = newPost.title;
-            formData.value.discription = newPost.description;
+            formData.value.description = newPost.description;
         }
     },
     { immediate: true },
@@ -54,19 +53,16 @@ const handleSubmit = async () => {
     errors.value = {};
 
     try {
-        // Send request with axios
         const response = await axios.put(
             route('posts.update', { post: props.post.id }),
             {
                 title: formData.value.title,
-                description: formData.value.discription,
+                description: formData.value.description,
             },
         );
-
-        // Handle success
         emit('updated', response.data.post);
+        emit('update:show', false);
     } catch (error) {
-        // Handle validation errors
         if (error.response && error.response.status === 422) {
             errors.value = error.response.data.errors;
         } else {
@@ -78,6 +74,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
+    errors.value = {};
     emit('update:show', false);
 };
 </script>
@@ -100,6 +97,7 @@ const handleCancel = () => {
                             id="edit-title"
                             v-model="formData.title"
                             placeholder="Enter post title"
+                            :class="{ 'border-red-500': errors.title }"
                         />
                         <p
                             v-if="errors.title"
@@ -110,12 +108,13 @@ const handleCancel = () => {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="edit-discription">Content</Label>
+                        <Label for="edit-description">Content</Label>
                         <Textarea
-                            id="edit-discription"
-                            v-model="formData.discription"
+                            id="edit-description"
+                            v-model="formData.description"
                             placeholder="Enter post description"
                             rows="5"
+                            :class="{ 'border-red-500': errors.description }"
                         />
                         <p
                             v-if="errors.description"
@@ -134,12 +133,14 @@ const handleCancel = () => {
                 >
                     Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction
+                <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                     :disabled="isSubmitting"
-                    @click="handleSubmit"
+                    @click.prevent="handleSubmit"
                 >
                     {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
-                </AlertDialogAction>
+                </button>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
