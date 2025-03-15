@@ -21,6 +21,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Schedule the PruneOldPostsJob to run daily at midnight
-app(Schedule::class)
-    ->job(new PruneOldPostsJob)
-    ->dailyAt('00:00');
+Schedule::call(function () {
+    dispatch(new PruneOldPostsJob());
+})->dailyAt('00:00');
