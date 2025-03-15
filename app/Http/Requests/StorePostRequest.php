@@ -26,6 +26,7 @@ class StorePostRequest extends FormRequest
             'title' => 'required|min:3|unique:posts,title',
             'description' => 'required|min:10',
             'user_id' => 'sometimes|exists:users,id',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Max 2MB, only jpg and png
         ];
     }
 
@@ -39,7 +40,6 @@ class StorePostRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $rule = new MaxPostsPerUser();
-
             $rule->validate('post_limit', null, function ($message) use ($validator) {
                 $validator->errors()->add('cannot_create_post', $message);
             });
