@@ -29,7 +29,7 @@ class UpdatePostRequest extends FormRequest
                 Rule::unique('posts')->ignore($this->route('post'))
             ],
             'description' => 'required|min:10',
-            // Removed user_id validation as we're not allowing users to change post ownership
+            'user_id' => 'sometimes|exists:users,id',
         ];
     }
 }
