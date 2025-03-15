@@ -22,33 +22,20 @@ class PostController extends Controller
         ]);
     }
 
-    // public function create()
-    // {
-    //     // This method won't be needed for SPA approach
-    //     return Inertia::render('Posts/Create');
-    // }
-
     public function store(StorePostRequest $request)
     {
-        // Request is already validated by StorePostRequest
         $validated = $request->validated();
-
-        // Create the post
         $post = Post::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'user_id' => auth()->id()
         ]);
-
-        // Load the user relationship for the response
         $post->load('user');
-
-        // Return JSON response for axios requests
         return response()->json([
             'success' => true,
             'post' => $post,
             'message' => 'Post created successfully'
-        ], 201); // 201 Created status code
+        ], 201);
     }
 
     public function show(Post $post)
@@ -64,23 +51,13 @@ class PostController extends Controller
         }
     }
 
-    // public function edit(Post $post)
-    // {
-    //     // This method won't be needed for SPA approach
-    //     return Inertia::render('Posts/Edit', [
-    //         'post' => $post
-    //     ]);
-    // }
-
     public function update(UpdatePostRequest $request, Post $post)
     {
-        // Request is already validated by UpdatePostRequest
         $validated = $request->validated();
-
-        // Update the post
+        if (isset($validated['user_id'])) {
+            unset($validated['user_id']);
+        }
         $post->update($validated);
-
-        // Return appropriate response
         return response()->json([
             'success' => true,
             'post' => $post->fresh()->load('user'),
@@ -111,34 +88,34 @@ class PostController extends Controller
     //     ]);
     // }
 
-    public function restore($id)
-    {
-        $post = Post::onlyTrashed()->findOrFail($id);
-        $post->restore();
+    // public function restore($id)
+    // {
+    //     $post = Post::onlyTrashed()->findOrFail($id);
+    //     $post->restore();
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'post' => $post->load('user'),
-                'message' => 'Post restored successfully'
-            ]);
-        }
+    //     if (request()->wantsJson()) {
+    //         return response()->json([
+    //             'post' => $post->load('user'),
+    //             'message' => 'Post restored successfully'
+    //         ]);
+    //     }
 
-        return redirect()->route('posts.trashed')
-            ->with('message', 'Post restored successfully');
-    }
+    //     return redirect()->route('posts.trashed')
+    //         ->with('message', 'Post restored successfully');
+    // }
 
-    public function forceDelete($id)
-    {
-        $post = Post::onlyTrashed()->findOrFail($id);
-        $post->forceDelete();
+    // public function forceDelete($id)
+    // {
+    //     $post = Post::onlyTrashed()->findOrFail($id);
+    //     $post->forceDelete();
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'message' => 'Post permanently deleted'
-            ]);
-        }
+    //     if (request()->wantsJson()) {
+    //         return response()->json([
+    //             'message' => 'Post permanently deleted'
+    //         ]);
+    //     }
 
-        return redirect()->route('posts.trashed')
-            ->with('message', 'Post permanently deleted');
-    }
+    //     return redirect()->route('posts.trashed')
+    //         ->with('message', 'Post permanently deleted');
+    // }
 }
