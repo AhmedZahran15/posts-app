@@ -24,7 +24,7 @@ class StorePostRequest extends FormRequest
         return [
             'title' => 'required|min:3|unique:posts,title',
             'description' => 'required|min:10',
-            // Removed user_id validation since we're using auth()->id() in the controller
+            'user_id' => 'sometimes|exists:users,id', // Add this validation to prevent invalid user_ids
         ];
     }
 }
