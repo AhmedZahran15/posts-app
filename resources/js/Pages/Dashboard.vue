@@ -15,8 +15,16 @@ import { Head } from '@inertiajs/vue3';
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
+                <div
+                    class="flex items-center gap-2 overflow-hidden bg-white p-4 shadow-sm sm:rounded-lg"
+                >
+                    <div class="text-gray-900">You're logged in!</div>
+                    <a
+                        href="/posts"
+                        class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
+                        Go to Posts.</a
+                    >
                 </div>
             </div>
         </div>
