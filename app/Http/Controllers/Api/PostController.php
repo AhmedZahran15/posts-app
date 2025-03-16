@@ -13,8 +13,7 @@ class PostController extends Controller
     // API endpoint to get all posts with pagination
     public function index()
     {
-        $posts = Post::with('user')
-            ->with('comments.user')
+        $posts = Post::with(['user','comments.user'])
             ->latest()
             ->paginate(10);
 
