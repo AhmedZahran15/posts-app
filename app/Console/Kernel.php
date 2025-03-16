@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\PruneOldPostsJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -10,9 +11,10 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
-        // Empty schedule method - scheduling moved to console.php
+        // Schedule the PruneOldPostsJob to run daily at midnight
+        $schedule->job(new PruneOldPostsJob())->dailyAt('00:00');
     }
 
     /**
